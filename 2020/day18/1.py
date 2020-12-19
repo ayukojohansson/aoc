@@ -1,4 +1,3 @@
-
 import re
 from collections import deque, defaultdict
 from itertools import combinations, product
@@ -7,48 +6,41 @@ file = open("input.txt", "r")
 lines = file.read()
 file.close()
 
-def calc(formula):
-#	print('\t', formula)
-	val, *rest = formula.strip().split(' ')
-	res = int(val)
-	while len(rest) > 1:
+# free from ()
+def calc(formula, isPart2):
+	rest = formula
+
+	if isPart2:
+		while '+' in rest:
+			i = rest.index('+')
+			rest = [*rest[:i-1], rest[i - 1] + rest[i + 1], *rest[i+2:]]
+	
+	val, *rest = rest
+	res = val
+	while rest:
 		opr, val, *rest = rest
-#		print(opr, val)
 		if opr == '+':
-			res = res + int(val)
+			res = res + val
 		elif opr == '*':
-			res = res * int(val)
+			res = res * val
 	
-#	print(res)
-	return str(res)
+	return res
 
-def findOpening(formula, end):
-	for i in range(end):
-		if formula[end - i] == '(':
-			return end - i
-	return 0
+def parse(string):
+	return [x if x in '*+()' else int(x) for x in string if x != ' ' ]
 
-def calc2(formula):
-	print(formula)
-	
-	while formula.count(')') > 0:
+# get rid of ()
+def calc2(formula, isPart2):
+	formula = parse(formula)
+
+	while formula.count(')'):
 		end = formula.index(')')
-		start = findOpening(formula, end)
-#		print(start, end)
-		formula = formula[:start] + calc(formula[start+1:end]) + formula[end+1:]
-		print(formula)
-	print(calc(formula))
-	return calc(formula)
+		start = next( i for i in range(end, -1, -1) if formula[i] == '(' )
+		formula = [*formula[:start], calc(formula[start+1:end], isPart2), *formula[end+1:]]
+	return calc(formula, isPart2)
 
-def main(rawInput):
-	total = 0
-	for formula in rawInput.split('\n'):
-		total += int(calc2(formula))
-		print('total', total)
+def main(rawInput, isPart2):
+	return sum([ calc2(formula, isPart2) for formula in rawInput.split('\n')])
 
-test = '1 + 2 * 3 + 4 * 5 + 6' #71
-test2 = '1 + (2 * 3) + (4 * (5 + 6))' #51
-test3 = '((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2' #51
-
-
-main(lines)
+print('part1', main(lines, False))
+print('part2', main(lines, True))

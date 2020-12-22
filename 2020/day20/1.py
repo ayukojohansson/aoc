@@ -11,15 +11,16 @@ def main2(rawInput):
 	tileDict = defaultdict(list)
 	for chunk in rawInput.split('\n\n'):
 		pId, *pixels = chunk.split('\n')
-		pid = re.search('Tile (\d+):', pId).groups()
+		pid = re.search('Tile (\d+):', pId).group(1)
+
 		top = pixels[0]
 		bottom = pixels[-1]
 		left = ''.join([pixels[i][0] for i in range(len(pixels))])
 		right = ''.join([pixels[i][-1] for i in range(len(pixels))])
 		for side in [top, bottom, left, right]:
-			pixDict[side].append(pid[0])
-			pixDict[side[::-1]].append(pid[0])
-		tileDict[pid[0]] = {
+			pixDict[side].append(pid)
+			pixDict[side[::-1]].append(pid)
+		tileDict[pid] = {
 			'side':[
 				top,
 				right,

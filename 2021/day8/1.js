@@ -49,16 +49,16 @@ console.log(counts)
 const getOutput = ([digits, output]) => {
   const res = digits
     .split(' ')
-    .reduce((acc, number) => {
-      const length = number.length;
+    .reduce((acc, code) => {
+      const length = code.length;
       if (length == 7) {
-        acc['8'] = number.split('').sort().join('')
+        acc['abcdefg'] = code;
       } else if (length == 4) {
-        acc['4'] = number.split('').sort().join('')
+        acc['bcdf'] = code;
       } else if (length == 2) {
-        acc['1'] = number.split('').sort().join('')
+        acc['cf'] = code;
       }
-      number.split('').forEach(a => acc['counts'][a] = (acc['counts'][a] || 0 ) +1);
+      code.split('').forEach(a => acc['counts'][a] = (acc['counts'][a] || 0 ) +1);
       return acc
     }, { counts: {} });
 
@@ -74,19 +74,17 @@ const getOutput = ([digits, output]) => {
         res['f'] = c;
         break;
       case 8:
-        res['ac'] = res['ac'] || [];
-        res['ac'].push(c)
+        res['ac'] = (res['ac'] || '') + c;
         break;
       case 7:
-        res['dg'] = res['dg'] || [];
-        res['dg'].push(c)
+        res['dg'] = (res['dg'] || '') + c;
         break;
     }
   });
-  res['c'] = res['1'].replace(res.f, '');
-  res['d'] = res['4'].replace(res.b, '').replace(res.c, '').replace(res.f, '');
-  res['a'] = res['ac'].join('').replace(res.c, '')
-  res['g'] = res['dg'].join('').replace(res.d, '')
+  res['c'] = res['cf'].replace(res.f, '');
+  res['d'] = res['bcdf'].replace(res.b, '').replace(res.c, '').replace(res.f, '');
+  res['a'] = res['ac'].replace(res.c, '');
+  res['g'] = res['dg'].replace(res.d, '');
 
   const lookup = Object.keys(numbers).reduce((l,n) => {
     const code = n.split('').map(m => res[m]).sort().join('');
@@ -98,10 +96,8 @@ const getOutput = ([digits, output]) => {
     .split(' ')
     .reduce((acc, o) => {
       const code = o.split('').sort().join('');
-
-      acc.push(lookup[code])
-      return acc
-    },[]).join('');
+      return acc + lookup[code]
+    }, '');
 
 }
 
@@ -115,5 +111,5 @@ const calc2 = (inputData) => {
 console.log('part 1:', calc(test))
 console.log('part 1:', calc(data))
 
-console.log('\npart 2:', calc2(test, true))
-console.log('part 2:', calc2(data, true))
+console.log('\npart 2:', calc2(test))
+console.log('part 2:', calc2(data))

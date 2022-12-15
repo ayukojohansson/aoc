@@ -84,7 +84,7 @@ const main = (str, isPart1 = false) => {
     unit++
   }
   console.log('unit', unit-1)
-  printMap();
+//  printMap();
 }
 
 

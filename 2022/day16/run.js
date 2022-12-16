@@ -40,7 +40,7 @@ const part1 = (valves, timeLimit) => {
     let time = 0;
     let index = 0;
     while (index < m.length) {
-      time += shortestPaths[curr][m[index]];
+      time += shortestPaths[curr][m[index]] + 1 /* time to open */;
       curr = m[index];
       index++;
     }
@@ -89,31 +89,50 @@ const part1 = (valves, timeLimit) => {
   return result;
 }
 
+
 const part2 = (valves) => {
-  
   const possiblePaths = part1(valves, 26);
+  const normalizePath = path => path.sort().join();
+
+  // normalize valves to open and keep only the best score
+  const normalized = possiblePaths.reduce((paths, item) => {
+    const key = normalizePath(item.path);
+    if (paths[key] == undefined || paths[key].sum < item.sum) {
+      paths[key] = item;
+    }
+    return paths;
+  }, {});
 
   const hasDuplicate = (left, right) => {
     return left.path.some(l => right.path.includes(l));
   }
 
-  const result = possiblePaths.reduce((max, item, index) => {
-    let tmpMax = 0;
-
-    // test all combinations
-    for(let i=index+1; i<possiblePaths.length; i++) {
-      if (!hasDuplicate(item, possiblePaths[i])) {
-        const sum = item.sum + possiblePaths[i].sum;
-        if (sum > tmpMax) tmpMax = sum;
+  const result = Object.values(normalized)
+    .sort((a,b) => b.sum - a.sum)
+    .reduce((max, item, index, array) => {
+      if (index == array.length-1) {
+        // elf opened all valves
+        return item.sum > max ? item.sum : max;
       }
-    }
 
-    return tmpMax > max ? tmpMax : max;
-  }, 0)
+      // list is sorted, so first found pair is the best
+      let i = index+1;
+      while (hasDuplicate(item, array[i])) {
+        i++;
+        if (i == array.length) {
+          // didn't find non-duplicate path
+          // means elf worked alone
+          return item.sum > max ? item.sum : max;
+        }
+      }
 
-  return result;
+      const sum = item.sum + array[i].sum;
+      return sum > max ? sum : max;
+    }, 0);
   
+  return result;
 }
+
 
 const main = (str) => {
   const valves = {};
@@ -130,7 +149,6 @@ const main = (str) => {
   const anser1 = part1(valves, 30).reduce((max, s) => { return max < s.sum ? s.sum : max }, 0);
   console.log('part1', anser1);
   
-  // need optimization!
   const answer2 = part2(valves);
   console.log('part2', answer2);
 }

@@ -21,7 +21,6 @@ const main = (input, boost=1, mix=1) => {
   const lines = input.split('\n');
   const monkeys = lines.reduce((m, line) => {
     const [name, value] = line.split(': ');
-    console.log(name, value)
     const args = value.split(' ');
     if (args.length == 1) m[name] = parseInt(args[0], 10);
     else m[name] = args;
@@ -112,10 +111,84 @@ const main2 = (input, boost=1, mix=1) => {
   console.log('answer is', answer)
 }
 
+const main3 = (input, boost=1, mix=1) => {
+  const lines = input.split('\n');
+  const monkeys = lines.reduce((m, line) => {
+    const [name, value] = line.split(': ');
+    const args = value.split(' ');
+    if (args.length == 1) m[name] = parseInt(args[0]);
+    else m[name] = args;
+    return m;
+  }, {})
+  
+  const yell = (name, humn) => {
+    const monkey = monkeys[name]
+    if (!monkey?.length) {
+      return monkey;
+    } else {
+      const left = yell(monkey[0]);
+      const right = yell(monkey[2]);
+      if (Number.isNaN(left) || Number.isNaN(right)) {
+        return NaN;
+      }
+      switch (monkey[1]) {
+        case '-':
+          return left - right;
+        case '+':
+          return left + right;
+        case '*':
+          return left * right;
+        case '/':
+          return left / right;
+      }
+    }
+  }
+  const swell = (name, v) => {
+    if (name == 'humn') {
+      return v;
+    }
+    const monkey = monkeys[name]
+    if (!monkey?.length) {
+      return monkey;
+    } else {
+      let left = yell(monkey[0]);
+      let right = yell(monkey[2]);
+      let next;
+      let value;
+      if (Number.isNaN(left)) {
+        x = 'L';
+        next = monkey[0]
+      } else {
+        x = 'R';
+        next = monkey[2]
+      }
+      
+      switch (name=='root'? '=' : monkey[1]) {
+        case '=':
+          return swell(next, left || right);
+        case '-':
+          return swell(next, (x == 'L' ? v + right : left - v));
+        case '+':
+          return swell(next, v - (x == 'L' ? right : left));
+        case '*':
+          return swell(next, (x == 'L' ? v / right : v / left));
+        case '/':
+          return swell(next, (x == 'L' ? right * v : v * left));
+      }
+    }
+  }
+
+  monkeys['humn'] = NaN;
+
+  console.log('answer is', swell('root'))
+}
+
 main(test)
 main(input)
 main2(test)
 main2(input)
+main3(test)
+main3(input)
 
 
 
